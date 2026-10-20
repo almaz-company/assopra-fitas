@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assopra Fitas</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23D4246C'/%3E%3Cpath d='M14 16h36a3 3 0 0 1 3 3v29a3 3 0 0 1-3 3H14a3 3 0 0 1-3-3V19a3 3 0 0 1 3-3z' fill='%231F1E1A'/%3E%3Crect x='18' y='22' width='28' height='14' rx='2' fill='%23EDECE8'/%3E%3Cpath d='M23 26h18M23 31h11' stroke='%23D4246C' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M18 42h4M26 42h4M34 42h4M42 42h4' stroke='%23EDECE8' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#1F1E1A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Playfair+Display:ital,wght@0,700;0,800;1,500;1,600;1,700;1,800;1,900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root{
+  --mag:#D4246C; --mag2:#E8538F; --blush:#F2A7C3; --ink:#1F1E1A; --ink2:#292826; --paper:#EDECE8; --stone:#6A6964; --white:#FFFFFF;
+  --serif:"Playfair Display",Georgia,serif; --sans:"DM Sans",system-ui,sans-serif; --mono:"DM Mono",ui-monospace,monospace;
+  --bg:var(--ink); --fg:#F6F4EF; --mute:#B9B6AE; --line:rgba(255,255,255,.10); --eb:var(--blush);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:var(--sans);color:var(--fg);-webkit-font-smoothing:antialiased;cursor:none}
+body.light{--bg:var(--paper);--fg:var(--ink);--mute:var(--stone);--line:rgba(31,30,26,.10);--eb:var(--mag)}
+body.mag{--bg:var(--mag);--fg:var(--ink);--mute:rgba(31,30,26,.75);--line:rgba(31,30,26,.18);--eb:var(--ink)}
+#bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block}
+#grain{position:fixed;inset:-50%;width:200%;height:200%;z-index:40;pointer-events:none;opacity:.06;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation:grain .9s steps(5) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(0,0)}}
+
+#stage{position:fixed;left:50%;top:50%;width:1920px;height:1080px;z-index:5}
+.slide{position:absolute;inset:0;visibility:hidden;display:flex;flex-direction:column;padding:92px 130px 118px}
+.slide.on{visibility:visible}
+
+/* header */
+.eb{display:flex;align-items:center;gap:14px;font-weight:700;font-size:19px;letter-spacing:.24em;text-transform:uppercase;color:var(--eb)}
+.eb .rec{width:12px;height:12px;border-radius:50%;background:var(--mag);box-shadow:0 0 0 0 rgba(212,36,108,.6);animation:rec 1.6s infinite}
+body.mag .eb .rec{background:var(--ink)}
+@keyframes rec{0%{box-shadow:0 0 0 0 rgba(212,36,108,.55)}70%{box-shadow:0 0 0 14px rgba(212,36,108,0)}100%{box-shadow:0 0 0 0 rgba(212,36,108,0)}}
+.hl{font-family:var(--serif);font-style:italic;font-weight:800;font-size:74px;line-height:1.08;letter-spacing:-.01em;margin-top:22px;max-width:1500px}
+.hl em{font-style:italic;color:var(--mag)}
+.lead{font-size:28px;line-height:1.5;color:var(--mute);margin-top:20px;max-width:1500px}
+.ln{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .06em .12em;margin:0 -.06em -.12em}
+.wd{display:inline-block;will-change:transform}
+
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px;min-height:0;padding:30px 0 0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+
+/* cards: soft glass, rounded */
+.card{position:relative;border-radius:28px;padding:36px 40px 38px;overflow:hidden;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
+  box-shadow:0 24px 60px -30px rgba(0,0,0,.55)}
+body.light .card{background:rgba(255,255,255,.78);border-color:rgba(255,255,255,.9);box-shadow:0 24px 60px -34px rgba(31,30,26,.35)}
+.card.inv{background:rgba(31,30,26,.92);border-color:rgba(31,30,26,.9);color:#F6F4EF}
+body:not(.light) .card.inv{background:rgba(246,244,239,.94);color:var(--ink);border-color:transparent}
+.card .k{display:block;font-size:17px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mag);margin-bottom:16px;line-height:1.3}
+body:not(.light) .card:not(.inv) .k{color:var(--blush)}
+.card.inv .k{color:var(--blush)}
+body:not(.light) .card.inv .k{color:var(--mag)}
+.card h3{font-size:36px;font-weight:700;letter-spacing:-.015em;line-height:1.18;margin-bottom:14px}
+.card.inv h3.hot,.card h3.hot{color:var(--mag)}
+.card.inv h3.hot{color:#FF6FA5}
+.card p,.card li{font-size:24px;line-height:1.55;color:var(--mute)}
+.card.inv p,.card.inv li{color:#CFCBC2}
+body:not(.light) .card.inv p,body:not(.light) .card.inv li{color:#4b4943}
+.card p + p{margin-top:14px}
+.card ul{list-style:none;display:flex;flex-direction:column;gap:14px}
+.card li{position:relative;padding-left:30px;color:inherit}
+body:not(.light) .card:not(.inv) li{color:#E9E6DF}
+.card li::before{content:"";position:absolute;left:2px;top:.62em;width:10px;height:10px;border-radius:50%;background:var(--mag)}
+.ic{display:block;width:46px;height:46px;margin-bottom:22px;color:var(--mag)}
+body:not(.light) .card:not(.inv) .ic{color:var(--blush)}
+.ic svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.card .cap{margin-top:auto;padding-top:22px;font-size:19px;font-weight:600;color:var(--mute);letter-spacing:.01em}
+.card.col{display:flex;flex-direction:column}
+.card .shine{position:absolute;inset:0;pointer-events:none;background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%),rgba(212,36,108,.10),transparent 45%);opacity:0;transition:opacity .4s}
+.card:hover .shine{opacity:1}
+
+.banner{position:relative;border-radius:24px;background:var(--mag);color:#fff;padding:28px 40px;font-size:26px;font-weight:700;line-height:1.4;overflow:hidden;margin-top:26px;display:flex;align-items:center;gap:22px}
+.banner .bi{flex:none;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center}
+.banner .bi svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.banner.serif{font-family:var(--serif);font-style:italic;font-weight:700;font-size:34px;color:var(--ink)}
+.banner::after{content:"";position:absolute;top:0;bottom:0;width:30%;left:-40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);transform:skewX(-20deg);animation:sweep 5s ease-in-out infinite 2s}
+@keyframes sweep{0%{left:-40%}35%,100%{left:130%}}
+.mono{font-family:var(--mono);font-size:.92em;background:rgba(212,36,108,.10);color:var(--mag);padding:2px 10px;border-radius:8px;white-space:nowrap}
+.arr{display:inline-block;width:.9em;height:.9em;vertical-align:-.08em;margin:0 .25em}
+.arr svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* brand */
+.brand{font-weight:800;font-size:26px;letter-spacing:-.01em}
+.brand b{color:var(--mag)}
+body.mag .brand b{color:#fff}
+
+/* UI */
+#ui{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;align-items:center;gap:20px;padding:16px 28px;font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--mute);pointer-events:none}
+#ui .play{display:flex;align-items:center;gap:8px;color:var(--fg)}
+#ui .play i{width:0;height:0;border-left:9px solid var(--mag);border-top:6px solid transparent;border-bottom:6px solid transparent}
+body.mag #ui .play i{border-left-color:var(--ink)}
+#tc{font-variant-numeric:tabular-nums}
+#ui .count{color:var(--fg);font-variant-numeric:tabular-nums}
+#prog{flex:1;height:3px;border-radius:3px;background:var(--line);position:relative;overflow:hidden}
+#prog i{position:absolute;inset:0;background:var(--mag);transform-origin:left;transform:scaleX(0);border-radius:3px}
+body.mag #prog i{background:var(--ink)}
+#dots{display:flex;gap:6px;pointer-events:auto}
+#dots button{width:8px;height:8px;border-radius:3px;border:0;background:var(--line);cursor:none;transition:.35s}
+#dots button.on{background:var(--mag);width:22px}
+body.mag #dots button.on{background:var(--ink)}
+#cursor{position:fixed;left:0;top:0;z-index:60;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--mag);pointer-events:none}
+body.mag #cursor{background:var(--ink)}
+#ring{position:fixed;left:0;top:0;z-index:59;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:1.5px solid var(--mag);pointer-events:none;opacity:.55}
+body.mag #ring{border-color:var(--ink)}
+
+/* transition: iris + static */
+#iris{position:fixed;inset:0;z-index:45;pointer-events:none}
+#iris div{position:absolute;inset:0;clip-path:circle(0% at 50% 50%)}
+#static{position:fixed;inset:0;width:100vw;height:100vh;z-index:46;pointer-events:none;opacity:0;mix-blend-mode:screen}
+.glitch{animation:glitch .38s steps(2) both}
+@keyframes glitch{
+  0%{transform:translate(0);filter:none}
+  20%{transform:translate(-14px,2px);filter:drop-shadow(6px 0 0 rgba(255,0,90,.7)) drop-shadow(-6px 0 0 rgba(0,220,255,.6))}
+  40%{transform:translate(10px,-3px);clip-path:inset(12% 0 40% 0)}
+  60%{transform:translate(-6px,0);clip-path:inset(50% 0 8% 0);filter:drop-shadow(-8px 0 0 rgba(255,0,90,.7)) drop-shadow(8px 0 0 rgba(0,220,255,.6))}
+  80%{transform:translate(4px,1px);clip-path:inset(0 0 0 0)}
+  100%{transform:translate(0);opacity:0}}
+
+/* ===== slide specific ===== */
+#s1{justify-content:center}
+#s1 .top{position:absolute;left:130px;right:130px;top:84px;display:flex;justify-content:space-between;align-items:center}
+#s1 .big{font-family:var(--serif);font-style:italic;font-weight:900;font-size:250px;line-height:1;letter-spacing:-.02em;color:var(--ink);margin-top:120px}
+#s1 .sub{font-size:40px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-top:26px;color:var(--ink)}
+#s1 .date{position:absolute;left:130px;bottom:120px;font-size:28px;color:#fff;font-weight:500}
+#s1 .brand{position:absolute;right:130px;bottom:120px;font-size:34px;color:var(--ink)}
+#s1 .orb{position:absolute;right:-30px;top:-40px;width:1040px;height:1040px;pointer-events:none}
+#s1 .tape{position:absolute;right:170px;top:96px;width:410px;pointer-events:none;opacity:.95}
+
+#s2 .flow{display:flex;align-items:center;gap:0;border-radius:28px;padding:40px 48px;position:relative}
+#s2 .chip{position:relative;z-index:2;font-size:40px;font-weight:700;padding:14px 34px;border-radius:60px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+#s2 .chip.hot{background:var(--mag);border-color:var(--mag);color:#fff}
+#s2 .wire{flex:1;height:3px;margin:0 18px;position:relative;background:rgba(255,255,255,.12);border-radius:3px;overflow:visible}
+#s2 .wire i{position:absolute;left:0;top:0;height:100%;width:100%;background:var(--mag);transform-origin:left;border-radius:3px}
+#s2 .wire b{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff;box-shadow:0 0 18px 4px rgba(212,36,108,.8)}
+#s2 .lead{font-size:31px;max-width:1300px;color:#CFCBC2}
+#s2 .hl{font-size:96px}
+
+#s6 table{width:100%;border-collapse:separate;border-spacing:0;font-size:25px}
+#s6 .tw{padding:0;overflow:hidden}
+#s6 th{background:var(--ink);color:#fff;text-align:left;font-weight:700;font-size:28px;padding:26px 32px}
+#s6 th:first-child{width:15%}
+#s6 td{padding:22px 32px;border-top:1px solid rgba(31,30,26,.08);line-height:1.4;vertical-align:top}
+#s6 td:first-child{font-weight:700;color:var(--ink)}
+#s6 tr:nth-child(even) td{background:rgba(237,236,232,.5)}
+#s6 td b{font-family:var(--serif);font-style:italic;font-size:44px;color:var(--mag);font-weight:800;line-height:1;display:block;margin-bottom:4px}
+#s6 th .dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--mag);margin-right:12px}
+
+.pct{display:flex;flex-direction:column;gap:26px}
+.pct .row{display:grid;grid-template-columns:1fr 120px;gap:8px 20px;align-items:end}
+.pct .row span{font-size:25px;color:var(--ink)}
+.pct .row b{font-family:var(--serif);font-style:italic;font-size:46px;color:var(--mag);text-align:right;line-height:1}
+.pct .bar{grid-column:1/-1;height:14px;border-radius:10px;background:rgba(31,30,26,.08);overflow:hidden}
+.pct .bar i{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,var(--mag),var(--mag2));transform-origin:left}
+.foot{margin-top:24px;font-size:20px;color:var(--mute)}
+.hero{font-family:var(--serif);font-style:italic;font-weight:900;font-size:150px;line-height:.9;color:var(--mag);letter-spacing:-.02em}
+.hero small{font-size:.45em}
+
+#s12 .hub{position:relative}
+#s12 .g2{gap:34px 150px}
+#s12 .core{position:absolute;left:50%;top:50%;width:170px;height:170px;margin:-85px 0 0 -85px;border-radius:50%;background:var(--mag);display:grid;place-items:center;text-align:center;font-family:var(--serif);font-style:italic;font-weight:800;font-size:28px;line-height:1.1;color:#fff;z-index:3;box-shadow:0 0 0 14px rgba(212,36,108,.18),0 0 0 30px rgba(212,36,108,.08)}
+#s12 .core::before{content:"";position:absolute;inset:-46px;border-radius:50%;border:1.5px dashed rgba(242,167,195,.4);animation:spin 30s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+#s20 .track{position:relative;height:64px;margin-bottom:6px}
+#s20 .track .base{position:absolute;left:0;right:0;top:28px;height:6px;border-radius:6px;background:rgba(31,30,26,.10)}
+#s20 .track .fill{position:absolute;left:0;right:0;top:28px;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--mag),var(--mag2));transform-origin:left}
+#s20 .track .m{position:absolute;top:18px;width:26px;height:26px;margin-left:-13px;border-radius:50%;background:#fff;border:5px solid var(--mag)}
+#s20 .track .lbl{position:absolute;top:-14px;font-family:var(--mono);font-size:16px;color:var(--stone);transform:translateX(-50%);letter-spacing:.1em}
+#s20 .card h3 .n{font-family:var(--serif);font-style:italic;font-size:64px;line-height:.9;display:block;color:var(--mag);margin-bottom:10px}
+#s20 .card.inv h3 .n{color:#FF6FA5}
+
+#s22{justify-content:center}
+#s22 .a{font-size:110px;font-weight:500;letter-spacing:-.025em;line-height:1.05}
+#s22 .b{font-family:var(--serif);font-style:italic;font-weight:800;font-size:150px;color:var(--mag);line-height:1.05;margin-top:6px}
+#s22 .url{position:absolute;left:130px;bottom:120px;font-size:30px;color:var(--mute);font-family:var(--mono)}
+#s22 .brand{position:absolute;right:130px;bottom:116px;font-size:40px}
+#s22 .reel{position:absolute;right:110px;top:70px;width:300px;opacity:.9}
+
+
+body.light .card.inv{background:rgba(31,30,26,.93);border-color:rgba(31,30,26,.9);box-shadow:0 30px 70px -30px rgba(31,30,26,.55)}
+.hl,.hero,.pct b,#s6 td b,#s20 .n,.banner.serif,#s22 .b,#s1 .big{font-variant-numeric:lining-nums}
+.roomy .card{padding:46px 48px 48px}
+.roomy .card p,.roomy .card li{font-size:28px}
+.roomy .card h3{font-size:42px}
+.roomy .card .k{font-size:19px;margin-bottom:22px}
+.roomy .card ul{gap:18px}
+#s20 .g4 .card h3{font-size:30px}
+#s20 .g4 .card p{font-size:22px}
+#s20 .track{margin-top:10px}
+@media (hover:none){body{cursor:auto}#cursor,#ring{display:none}}
+</style>
+</head>
+<body class="mag">
+<canvas id="bg"></canvas>
+<div id="stage">
+
+<!-- 01 CAPA -->
+<section class="slide" id="s1" data-theme="mag" data-scene="bloom" data-label="Capa">
+  <svg class="orb" viewBox="0 0 1040 1040" data-depth="18">
+    <circle cx="560" cy="460" r="378" fill="rgba(255,255,255,.10)" data-a="scale"/>
+    <g class="spin" style="transform-origin:560px 460px"><circle cx="560" cy="460" r="430" fill="none" stroke="rgba(31,30,26,.22)" stroke-width="1.5" stroke-dasharray="3 14"/><circle cx="560" cy="30" r="9" fill="#1F1E1A"/></g>
+    <g class="spin2" style="transform-origin:560px 460px"><circle cx="560" cy="460" r="300" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-dasharray="120 60" data-a="draw"/></g>
+  </svg>
+  <svg class="tape" viewBox="0 0 520 330" data-depth="34">
+    <g fill="none" stroke="#1F1E1A" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="10" y="10" width="500" height="310" rx="26" data-a="draw"/>
+      <rect x="62" y="56" width="396" height="150" rx="16" data-a="draw"/>
+      <path d="M130 320l34-70h192l34 70" data-a="draw"/>
+    </g>
+    <g class="reel" style="transform-origin:180px 131px"><circle cx="180" cy="131" r="44" fill="none" stroke="#1F1E1A" stroke-width="5"/><path d="M180 95v20M180 147v20M144 131h20M196 131h20" stroke="#1F1E1A" stroke-width="5" stroke-linecap="round"/></g>
+    <g class="reel" style="transform-origin:340px 131px"><circle cx="340" cy="131" r="44" fill="none" stroke="#1F1E1A" stroke-width="5"/><path d="M340 95v20M340 147v20M304 131h20M356 131h20" stroke="#1F1E1A" stroke-width="5" stroke-linecap="round"/></g>
+    <rect x="224" y="112" width="72" height="38" rx="6" fill="#fff" opacity=".85"/>
+  </svg>
+  <div class="top"><div class="eb" data-a="fade"><span class="rec"></span>Assopra Fitas · Plano de afiliados</div></div>
+  <h1 class="big" data-split>Planejamento</h1>
+  <div class="sub" data-a="up">Afiliados &amp; Assopra Recomenda</div>
+  <div class="date" data-a="up">Outubro, 2026</div>
+  <div class="brand" data-a="up">Assopra<b>Fitas</b></div>
+</section>
+
+<!-- 02 PRINCÍPIO -->
+<section class="slide" id="s2" data-theme="dark" data-scene="vhs" data-label="Princípio da operação">
+  <div class="eb" data-a="fade"><span class="rec"></span>Princípio da operação</div>
+  <h2 class="hl" data-split>Conteúdo primeiro. Produto depois. <em>Plataforma por último.</em></h2>
+  <div class="body">
+    <p class="lead" data-a="up">O planejamento não começa escolhendo Amazon, Shopee ou Mercado Livre. Começa no vídeo. Só depois entendemos quais produtos fazem sentido pra aquele assunto, e só por último decidimos onde o link rende mais. Assim a gente nunca força um produto pra caber numa plataforma.</p>
+    <div class="flow card" data-a="card">
+      <span class="chip">Vídeo</span><span class="wire"><i data-a="grow"></i><b></b></span><span class="chip">Produto</span><span class="wire"><i data-a="grow"></i><b></b></span><span class="chip hot">Plataforma</span>
+    </div>
+  </div>
+</section>
+
+<!-- 03 FLUXO EDITORIAL -->
+<section class="slide" id="s3" data-theme="light" data-scene="pixels" data-label="Fluxo editorial">
+  <div class="eb" data-a="fade"><span class="rec"></span>Fluxo editorial</div>
+  <h2 class="hl" data-split>Afiliado entra no planejamento junto com a pauta, <em>não depois</em></h2>
+  <div class="body">
+    <div class="g3">
+      <div class="card" data-a="card"><i class="ic" data-icon="clock"></i><span class="k">1. Vídeo entra no calendário</span><p>Marca se tem potencial de afiliado: sim ou não.</p></div>
+      <div class="card" data-a="card"><i class="ic" data-icon="search"></i><span class="k">2. Produtos candidatos</span><p>Lista o que aparece ou se relaciona com o assunto do vídeo.</p></div>
+      <div class="card inv" data-a="card"><i class="ic" data-icon="link"></i><span class="k">3. CTA definido</span><p>Onde o link aparece e como o Gus chama pra clicar.</p></div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg></span><span>Exemplo: vídeo de PS2 <span class="arr" data-arr></span> controle, memory card, adaptador e cabo entram como candidatos <span class="arr" data-arr></span> CTA na descrição e comentário fixado.</span></div>
+</section>
+
+<!-- 04 DUAS ORIGENS -->
+<section class="slide" id="s4" data-theme="light" data-scene="pixels" data-label="Estratégia editorial">
+  <div class="eb" data-a="fade"><span class="rec"></span>Estratégia editorial</div>
+  <h2 class="hl" data-split>Duas origens para a <em>mesma curadoria.</em></h2>
+  <p class="lead" data-a="up">Nem toda indicação precisa nascer de um vídeo novo. Toda indicação precisa ter relação com o público.</p>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><h3>Conteúdo <span class="arr" data-arr></span> produto <span class="arr" data-arr></span> plataforma</h3><p>O vídeo entra no calendário, a equipe relaciona produtos coerentes com o tema e escolhe a melhor opção de compra.</p><p><b style="color:var(--ink)">Exemplo:</b> vídeo de PS2 <span class="arr" data-arr></span> controle, adaptador e memory card.</p></div>
+      <div class="card inv" data-a="card"><h3 class="hot">Achado <span class="arr" data-arr></span> validação <span class="arr" data-arr></span> comunidade</h3><p>Uma oportunidade pode aparecer antes de qualquer novo vídeo. A equipe confere o item e decide se merece recomendação.</p><p><b style="color:#fff">Exemplo:</b> promoção de controle retrô já aprovado.</p></div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span><span>Sem recomendação forçada: relevância, confiança e transparência são critérios obrigatórios.</span></div>
+</section>
+
+<!-- 05 VISÃO GERAL -->
+<section class="slide" id="s5" data-theme="light" data-scene="pixels" data-label="Visão geral">
+  <div class="eb" data-a="fade"><span class="rec"></span>Visão geral</div>
+  <h2 class="hl" data-split>Três plataformas pra onde o link pode ir, mais a curadoria que <em>já carrega o nome Assopra.</em></h2>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><span class="k"><i class="ic" data-icon="link" style="display:inline-block;width:26px;height:26px;margin:0 10px -6px 0"></i>Frente 1</span><h3>Amazon Associados</h3><p>Consoles e periféricos novos: itens que resolvem uma necessidade real de quem joga retrô hoje.</p></div>
+      <div class="card" data-a="card"><span class="k"><i class="ic" data-icon="star" style="display:inline-block;width:26px;height:26px;margin:0 10px -6px 0"></i>Frente 2</span><h3>Shopee Afiliados</h3><p>Colecionáveis e itens de nostalgia: comissão maior, ticket menor, compra por impulso.</p></div>
+      <div class="card" data-a="card"><span class="k"><i class="ic" data-icon="search" style="display:inline-block;width:26px;height:26px;margin:0 10px -6px 0"></i>Frente 3</span><h3>Mercado Livre Afiliados</h3><p>Usados e cartuchos raros: cobre o que a Amazon não vende, o mercado de relíquias.</p></div>
+      <div class="card inv" data-a="card"><span class="k"><i class="ic" data-icon="users" style="display:inline-block;width:26px;height:26px;margin:0 10px -6px 0;color:var(--blush)"></i>Assopra Recomenda</span><h3>Página + Comunidade</h3><p>gusang.com.br/recomenda e a comunidade de WhatsApp, mesma curadoria.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 TABELA -->
+<section class="slide" id="s6" data-theme="light" data-scene="pixels" data-label="Onde o link rende mais">
+  <div class="eb" data-a="fade"><span class="rec"></span>Onde o link rende mais</div>
+  <h2 class="hl" data-split>Mesmas três plataformas, agora como <em>critério de escolha</em></h2>
+  <div class="body">
+    <div class="card tw" data-a="card">
+      <table>
+        <tr><th></th><th><span class="dot"></span>Amazon</th><th><span class="dot"></span>Shopee</th><th><span class="dot"></span>Mercado Livre</th></tr>
+        <tr><td>Foco</td><td>Consoles e periféricos novos</td><td>Colecionáveis e nostalgia</td><td>Usados e cartuchos raros</td></tr>
+        <tr><td>Comissão</td><td><b><span data-count="8">0</span>%</b>em games e consoles</td><td><b>Variável</b>geralmente maior</td><td><b><span data-count="9.5" data-dec="1">0</span>%</b>em videogames</td></tr>
+        <tr><td>Ticket médio</td><td>Médio a alto</td><td>Baixo, por impulso</td><td>Variável, por vendedor</td></tr>
+        <tr><td>Onde aparece</td><td>Descrição + comentário fixado</td><td>Descrição + stories</td><td>Descrição, com aviso de usado</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 07 AMAZON -->
+<section class="slide roomy" id="s7" data-theme="dark" data-scene="vhs" data-label="Frente 1 · Amazon">
+  <div class="eb" data-a="fade"><span class="rec"></span>Frente 1</div>
+  <h2 class="hl" data-split>Amazon <em>Associados</em></h2>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><span class="k">Como funciona</span>
+        <ul><li data-a="li">Link rastreável por vídeo, colado na descrição e fixado no comentário</li><li data-a="li">Cliente tem até 24h após o clique para a compra contar como conversão</li><li data-a="li">Pagamento após 3 vendas qualificadas em 180 dias, mínimo de R$30</li></ul></div>
+      <div class="card inv" data-a="card"><span class="k">Categorias prioritárias</span>
+        <div class="pct">
+          <div class="row"><span>Games e Consoles</span><b><span data-count="8">0</span>%</b><div class="bar"><i data-bar=".8"></i></div></div>
+          <div class="row"><span>Eletrônicos e Acessórios</span><b><span data-count="8.5" data-dec="1">0</span>%</b><div class="bar"><i data-bar=".85"></i></div></div>
+          <div class="row"><span>Casa, Decoração e Colecionáveis</span><b><span data-count="9">0</span>%</b><div class="bar"><i data-bar=".9"></i></div></div>
+        </div></div>
+    </div>
+    <p class="foot" data-a="fade">Comissões de referência: Amazon Associados Brasil, por categoria de produto</p>
+  </div>
+</section>
+
+<!-- 08 SHOPEE -->
+<section class="slide roomy" id="s8" data-theme="dark" data-scene="vhs" data-label="Frente 2 · Shopee">
+  <div class="eb" data-a="fade"><span class="rec"></span>Frente 2</div>
+  <h2 class="hl" data-split>Shopee <em>Afiliados</em></h2>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><span class="k">Como funciona</span>
+        <ul><li data-a="li">Comissão liberada por pedido confirmado, sem mínimo de recorrência</li><li data-a="li">Link vai na descrição do vídeo e nos destaques do Instagram</li><li data-a="li">Prioridade para produtos de ticket baixo e compra por impulso</li></ul></div>
+      <div class="card inv" data-a="card"><span class="k">O que entra aqui</span>
+        <ul><li data-a="li">Réplicas e colecionáveis temáticos</li><li data-a="li">Acessórios de baixo custo: adaptadores, capinhas, luminárias</li><li data-a="li">Itens de humor e referência interna do canal</li></ul></div>
+    </div>
+    <p class="foot" data-a="fade">Shopee Afiliados, painel próprio, sem gerenciador terceirizado</p>
+  </div>
+</section>
+
+<!-- 09 MERCADO LIVRE -->
+<section class="slide roomy" id="s9" data-theme="dark" data-scene="vhs" data-label="Frente 3 · Mercado Livre">
+  <div class="eb" data-a="fade"><span class="rec"></span>Frente 3</div>
+  <h2 class="hl" data-split>Mercado Livre <em>Afiliados</em></h2>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><span class="k">Como funciona</span>
+        <div class="hero" data-a="up"><span data-count="9.5" data-dec="1">0</span><small>%</small></div>
+        <ul style="margin-top:22px"><li data-a="li">Comissão de até 9,5% em Videogames, a maior das três frentes</li><li data-a="li">Vendedores pessoa física listam consoles usados e cartuchos soltos</li><li data-a="li">Pagamento via Mercado Pago, aprovação em até 60 dias após a venda</li></ul></div>
+      <div class="card inv" data-a="card"><span class="k">Por que entra</span>
+        <ul><li data-a="li">Cobre o que a Amazon não tem: usados, raros e relíquias</li><li data-a="li">Ideal para vídeos de "achado" e itens que não existem mais em loja nova</li><li data-a="li">Link com aviso claro de que o item é usado, na descrição</li></ul></div>
+    </div>
+    <p class="foot" data-a="fade">Comissão de referência: Mercado Livre Afiliados, categoria Videogames: 9,5%</p>
+  </div>
+</section>
+
+<!-- 10 LINKS -->
+<section class="slide" id="s10" data-theme="light" data-scene="pixels" data-label="Organização de links">
+  <div class="eb" data-a="fade"><span class="rec"></span>Organização de links</div>
+  <h2 class="hl" data-split>Todo link passa por um gerenciador central, <em>nunca link cru da loja</em></h2>
+  <div class="body">
+    <div class="g3">
+      <div class="card col" data-a="card"><i class="ic" data-icon="toolbox"></i><span class="k">Ferramenta</span><p style="color:var(--ink)">Geniuslink ou Linkfy concentra Amazon, Shopee e Mercado Livre em um painel só.</p><span class="cap">Um painel, três plataformas</span></div>
+      <div class="card col" data-a="card"><i class="ic" data-icon="code"></i><span class="k">Nomenclatura</span><p style="color:var(--ink)">Padrão fixo: <span class="mono">categoria-vídeo-plataforma</span><br>Ex: <span class="mono">consoles-ps2review-amazon</span></p><span class="cap">Mesmo padrão, sempre</span></div>
+      <div class="card col inv" data-a="card"><i class="ic" data-icon="book" style="color:var(--blush)"></i><span class="k">Categorias</span><p style="color:#fff">Quatro grupos fixos: consoles, jogos, periféricos, colecionáveis.</p><span class="cap" style="color:#CFCBC2">Quatro grupos, zero bagunça</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 PONTOS DE CONTATO -->
+<section class="slide" id="s11" data-theme="light" data-scene="pixels" data-label="Assopra Recomenda">
+  <div class="eb" data-a="fade"><span class="rec"></span>Assopra Recomenda</div>
+  <h2 class="hl" data-split>Uma curadoria, <em>vários pontos de contato</em></h2>
+  <p class="lead" data-a="up">As comunidades do Gus já existem. Vamos organizar sua monetização sem mudar a relação com o público.</p>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><h3><i class="ic" data-icon="layout" style="display:inline-block;width:30px;height:30px;margin:0 12px -4px 0"></i>Página permanente</h3><p><span class="mono">gusang.com.br/recomenda</span><br>Produtos dos vídeos, setup, acessórios e achados selecionados.</p></div>
+      <div class="card inv" data-a="card"><h3 class="hot"><i class="ic" data-icon="chat" style="display:inline-block;width:30px;height:30px;margin:0 12px -4px 0;color:#FF6FA5"></i>2 grupos de WhatsApp existentes</h3><p>A equipe já tem acesso. Testar recomendações adequadas ao propósito de cada grupo.</p></div>
+      <div class="card" data-a="card"><h3><i class="ic" data-icon="play" style="display:inline-block;width:30px;height:30px;margin:0 12px -4px 0"></i>Comunidade do YouTube</h3><p>Enquetes, conversas, recomendações e descobertas ligadas aos conteúdos do canal.</p></div>
+      <div class="card" data-a="card"><h3><i class="ic" data-icon="megaphone" style="display:inline-block;width:30px;height:30px;margin:0 12px -4px 0"></i>Canais de WhatsApp</h3><p>Distribuição de oportunidades e achados com frequência apropriada e adesão voluntária.</p></div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span><span>O ponto de partida é aproveitar os espaços existentes. Não precisamos criar outros grupos agora.</span></div>
+</section>
+
+<!-- 12 MAPA DE DISTRIBUIÇÃO -->
+<section class="slide" id="s12" data-theme="dark" data-scene="vhs" data-label="Mapa de distribuição">
+  <div class="eb" data-a="fade"><span class="rec"></span>Mapa de distribuição</div>
+  <h2 class="hl" data-split>Cada canal tem <em>uma função na operação.</em></h2>
+  <p class="lead" data-a="up">Evitar publicar a mesma oferta em todo lugar sem considerar o contexto.</p>
+  <div class="body">
+    <div class="hub">
+      <div class="g2">
+        <div class="card" data-a="card"><span class="k">YouTube</span><h3>Gerar interesse</h3><p>Vídeos, descrições, comentários quando apropriado, enquetes e recomendações contextuais.</p></div>
+        <div class="card inv" data-a="card"><span class="k">Grupos</span><h3>Relacionamento</h3><p>Produtos testados, dúvidas, achados pontuais e escuta ativa da comunidade.</p></div>
+        <div class="card" data-a="card"><span class="k">Canais</span><h3>Ofertas selecionadas</h3><p>Recomendações recorrentes para quem escolheu acompanhar oportunidades.</p></div>
+        <div class="card" data-a="card"><span class="k">Página</span><h3>Catálogo vivo</h3><p>Organizar produtos dos vídeos, itens recomendados e alternativas quando ofertas expirarem.</p></div>
+      </div>
+      <div class="core" data-a="pop">Assopra<br>Recomenda</div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></span><span>Link direto quando fizer sentido; página central para consulta e curadoria de longo prazo.</span></div>
+</section>
+
+<!-- 13 AUTOMAÇÃO -->
+<section class="slide" id="s13" data-theme="light" data-scene="pixels" data-label="Automação e curadoria">
+  <div class="eb" data-a="fade"><span class="rec"></span>Automação e curadoria</div>
+  <h2 class="hl" data-split>Tecnologia reduz trabalho. <em>A escolha continua humana.</em></h2>
+  <p class="lead" data-a="up">O Achadinho Pro entra como primeira ferramenta a validar, conforme conversa com o Gus.</p>
+  <div class="body">
+    <div class="g3">
+      <div class="card" data-a="card"><i class="ic" data-icon="search"></i><span class="k">Passo 1</span><h3>Encontrar oportunidades</h3><p>Filtrar por PS2, Nintendo, hardware, retrô, controles, adaptadores e colecionáveis. Conferir disponibilidade e preço.</p></div>
+      <div class="card inv" data-a="card"><i class="ic" data-icon="user" style="color:var(--blush)"></i><span class="k">Passo 2</span><h3 class="hot">Validar indicações</h3><p>A equipe verifica relevância, qualidade, vendedor, compatibilidade e se o Gus realmente recomenda o item.</p></div>
+      <div class="card" data-a="card"><i class="ic" data-icon="calendar"></i><span class="k">Passo 3</span><h3>Distribuir com controle</h3><p>Agendar ofertas aprovadas nos canais compatíveis, respeitando permissões, frequência e regras das plataformas.</p></div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></span><span>Não conectar contas essenciais antes de confirmar método de integração, segurança e políticas do WhatsApp.</span></div>
+</section>
+
+<!-- 14 INTENÇÃO DE COMPRA -->
+<section class="slide roomy" id="s14" data-theme="light" data-scene="pixels" data-label="Formatos com intenção de compra">
+  <div class="eb" data-a="fade"><span class="rec"></span>Formatos com intenção de compra</div>
+  <h2 class="hl" data-split>De vez em quando, <em>não o canal inteiro</em></h2>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><i class="ic" data-icon="play"></i><h3>"Testei acessórios pro PS2"</h3><p>Review de produto, CTA direto no item testado.</p></div>
+      <div class="card" data-a="card"><i class="ic" data-icon="bulb"></i><h3>"Vale comprar um PS3 em 2026?"</h3><p>Vídeo de decisão de compra, intenção já existe.</p></div>
+      <div class="card" data-a="card"><i class="ic" data-icon="wrench"></i><h3>"Montei um setup retrô gastando X"</h3><p>Lista de produtos com link por item.</p></div>
+      <div class="card inv" data-a="card"><i class="ic" data-icon="star" style="color:var(--blush)"></i><h3>"Testei os portáteis mais vendidos"</h3><p>Comparativo, ranking com links individuais.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 FORMATOS DE CONTEÚDO -->
+<section class="slide" id="s15" data-theme="dark" data-scene="vhs" data-label="Formatos de conteúdo">
+  <div class="eb" data-a="fade"><span class="rec"></span>Formatos de conteúdo</div>
+  <h2 class="hl" data-split>O que testar além dos <em>vídeos tradicionais</em></h2>
+  <p class="lead" data-a="up">A operação combina recomendações permanentes, oportunidades pontuais e escuta da audiência.</p>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><h3>Achados do Gus</h3><p>Produtos e ofertas selecionados, com preço e disponibilidade conferidos.</p></div>
+      <div class="card inv" data-a="card"><h3 class="hot">Setup do Assopra</h3><p>Equipamentos e acessórios efetivamente utilizados ou conhecidos pelo Gus.</p></div>
+      <div class="card" data-a="card"><h3>Vale comprar?</h3><p>Prós, limitações, compatibilidade, riscos e alternativas para hardware retrô.</p></div>
+      <div class="card" data-a="card"><h3>A comunidade escolhe</h3><p>Enquetes sobre produtos a testar, comparar ou procurar em promoção.</p></div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span>Priorizar campanhas relevantes, incluindo Black Friday e Natal, sem excessos na frequência.</span></div>
+</section>
+
+<!-- 16 RESPONSABILIDADES -->
+<section class="slide" id="s16" data-theme="light" data-scene="pixels" data-label="Operação na prática">
+  <div class="eb" data-a="fade"><span class="rec"></span>Operação na prática</div>
+  <h2 class="hl" data-split>Responsabilidades claras para <em>não depender do Gus</em></h2>
+  <p class="lead" data-a="up">Estrutura sugerida para validação conjunta com o time.</p>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><h3><i class="ic" data-icon="user" style="display:inline-block;width:30px;height:30px;margin:0 12px -4px 0"></i>Gus: direção e validação</h3><p>Critérios criativos, recomendações estratégicas e participação nos conteúdos centrais.</p></div>
+      <div class="card inv" data-a="card"><h3 class="hot"><i class="ic" data-icon="target" style="display:inline-block;width:30px;height:30px;margin:0 12px -4px 0;color:#FF6FA5"></i>Almaz: coordenação</h3><p>Organização da rotina, curadoria, aprovação e acompanhamento de resultados.</p></div>
+      <div class="card" data-a="card"><h3><i class="ic" data-icon="link" style="display:inline-block;width:30px;height:30px;margin:0 12px -4px 0"></i>Apoio operacional</h3><p>Links, cadastro de produtos, checagem de disponibilidade e publicações aprovadas.</p></div>
+      <div class="card" data-a="card"><h3><i class="ic" data-icon="cog" style="display:inline-block;width:30px;height:30px;margin:0 12px -4px 0"></i>Suporte técnico</h3><p>Configuração, permissões, integração, segurança e manutenção da ferramenta.</p></div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span><span>Definir quem aprova, quem publica, quem confere os números e quem responde a problemas.</span></div>
+</section>
+
+<!-- 17 SEGURANÇA -->
+<section class="slide" id="s17" data-theme="dark" data-scene="vhs" data-label="Segurança e conformidade">
+  <div class="eb" data-a="fade"><span class="rec"></span>Segurança e conformidade</div>
+  <h2 class="hl" data-split>Validar antes de <em>conectar e disparar</em></h2>
+  <p class="lead" data-a="up">O uso de número separado não elimina o risco de bloqueios ou problemas de privacidade.</p>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><i class="ic" data-icon="shield"></i><h3>Achadinho Pro: checar antes</h3>
+        <ul><li data-a="li">Método de conexão e permissões</li><li data-a="li">Compatibilidade real com grupos e canais</li><li data-a="li">Integração com cada marketplace</li><li data-a="li">Aprovação humana e limites de publicação</li><li data-a="li">Acesso ao painel e suporte</li></ul>
+        <p style="margin-top:16px">O preço mencionado no grupo precisa ser reconfirmado.</p></div>
+      <div class="card inv" data-a="card"><i class="ic" data-icon="check" style="color:var(--mag)"></i><h3 class="hot" style="color:var(--mag)">Regras e confiança</h3>
+        <ul><li data-a="li">Priorizar formas permitidas de publicação</li><li data-a="li">Proteger os acessos</li><li data-a="li">Identificar links comerciais/de afiliado</li><li data-a="li">Evitar excesso de mensagens</li><li data-a="li">Não promover réplicas irregulares, anúncios duvidosos ou produtos sem verificação</li></ul></div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><span>A reunião com o Beto deve validar a operação; tutoriais disponíveis não comprovam segurança.</span></div>
+</section>
+
+<!-- 18 ACOMPANHAMENTO -->
+<section class="slide" id="s18" data-theme="light" data-scene="pixels" data-label="Acompanhamento de resultados">
+  <div class="eb" data-a="fade"><span class="rec"></span>Acompanhamento de resultados</div>
+  <h2 class="hl" data-split>Medir receita e confiança, <em>não só cliques.</em></h2>
+  <p class="lead" data-a="up">A análise deve diferenciar interesse, venda confirmada, comissão recebida e esforço operacional.</p>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><span class="k">Ritmo semanal</span><h3>Toda semana</h3><p>Cliques por publicação, origem dos acessos, conteúdos com melhor resposta e reação da comunidade.</p></div>
+      <div class="card inv" data-a="card"><span class="k">Ritmo mensal</span><h3 class="hot">Todo mês</h3><p>Pedidos, conversões, comissões confirmadas, cancelamentos, custo de ferramentas e horas de trabalho.</p></div>
+      <div class="card" data-a="card"><span class="k">Ritmo trimestral</span><h3>A cada trimestre</h3><p>RPM de afiliados por mil visualizações e desempenho por tipo de conteúdo e canal.</p></div>
+      <div class="card" data-a="card"><span class="k">Regra</span><h3>Decisão baseada em dados</h3><p>Ampliar somente formatos que gerem retorno sem comprometer o relacionamento com os seguidores.</p></div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span>Não incluir percentuais de remuneração ou acordos comerciais entre Almaz e Gus neste planejamento.</span></div>
+</section>
+
+<!-- 19 CRITÉRIOS -->
+<section class="slide roomy" id="s19" data-theme="dark" data-scene="vhs" data-label="Critérios de produto">
+  <div class="eb" data-a="fade"><span class="rec"></span>Critérios de produto</div>
+  <h2 class="hl" data-split>Funcional primeiro, <em>nostalgia depois</em></h2>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><i class="ic" data-icon="wrench"></i><span class="k">Prioridade 1: Funcional</span><p style="color:#E9E6DF;font-size:27px">Resolve uma necessidade real de quem ainda joga retrô: adaptador, memory card, fita de limpeza, controle compatível.</p></div>
+      <div class="card" data-a="card"><i class="ic" data-icon="star"></i><span class="k">Prioridade 2: Emocional</span><p style="color:#E9E6DF;font-size:27px">Desperta nostalgia mesmo sem função prática: réplica, colecionável, quadro, luminária temática.</p></div>
+    </div>
+  </div>
+  <div class="banner serif" data-a="banner"><span>Produto sem relação direta com o vídeo não entra: recomendação forçada quebra a confiança do canal.</span></div>
+</section>
+
+<!-- 20 PILOTO -->
+<section class="slide" id="s20" data-theme="light" data-scene="pixels" data-label="Implementação">
+  <div class="eb" data-a="fade"><span class="rec"></span>Implementação</div>
+  <h2 class="hl" data-split>Piloto de <em><span data-count="30">0</span> dias</em> com expansão por resultado</h2>
+  <p class="lead" data-a="up">Não esperar uma operação complexa para começar. Testar poucos canais e medir a resposta.</p>
+  <div class="body">
+    <div class="track"><div class="base"></div><div class="fill" data-a="grow"></div>
+      <span class="lbl" style="left:0;transform:none">DIA 1</span><span class="lbl" style="left:100%;transform:translateX(-100%)">DIA 30</span>
+      <span class="m" style="left:12.5%" data-a="pop"></span><span class="m" style="left:37.5%" data-a="pop"></span><span class="m" style="left:62.5%" data-a="pop"></span><span class="m" style="left:87.5%" data-a="pop"></span></div>
+    <div class="g4">
+      <div class="card" data-a="card"><h3><span class="n">01</span>Semana 1 | Preparar</h3><p>Mapear os dois grupos e demais canais; validar Achadinho Pro; definir aprovações e produtos iniciais.</p></div>
+      <div class="card inv" data-a="card"><h3 class="hot"><span class="n">02</span>Semana 2 | Testar</h3><p>Divulgar poucos achados em espaços adequados; monitorar links, segurança e frequência.</p></div>
+      <div class="card" data-a="card"><h3><span class="n">03</span>Semana 3 | Integrar</h3><p>Conectar recomendações aos vídeos recentes e atualizar conteúdos antigos com potencial.</p></div>
+      <div class="card" data-a="card"><h3><span class="n">04</span>Semana 4 | Decidir</h3><p>Revisar pedidos, comissões, horas de operação, custos e feedback dos seguidores.</p></div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span>Expandir somente após validar resultado e aceitação da audiência.</span></div>
+</section>
+
+<!-- 21 PRÓXIMOS PASSOS -->
+<section class="slide roomy" id="s21" data-theme="light" data-scene="pixels" data-label="Próximos passos">
+  <div class="eb" data-a="fade"><span class="rec"></span>Próximos passos</div>
+  <h2 class="hl" data-split>Sair da reunião com <em>um piloto definido</em></h2>
+  <p class="lead" data-a="up">O Gus pediu para participar da configuração e começar sem enrolação.</p>
+  <div class="body">
+    <div class="g2">
+      <div class="card" data-a="card"><i class="ic" data-icon="user"></i><h3>Alinhamento com o Gus</h3><p>Confirmar quais dos dois grupos entram no piloto, como utilizar os canais e a comunidade do YouTube e o tipo de produto que ele se sente confortável em recomendar.</p></div>
+      <div class="card inv" data-a="card"><i class="ic" data-icon="cog" style="color:var(--blush)"></i><h3 class="hot">Alinhamento operacional</h3><p>Conversar com o Beto; verificar segurança e capacidades do Achadinho Pro; combinar responsabilidades, primeira lista de produtos e datas de teste.</p></div>
+    </div>
+  </div>
+  <div class="banner" data-a="banner"><span class="bi"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span><span>Resultado esperado: acessos validados, responsáveis definidos e primeiras recomendações programadas.</span></div>
+</section>
+
+<!-- 22 FECHAMENTO -->
+<section class="slide" id="s22" data-theme="dark" data-scene="vhs" data-label="Fechamento">
+  <svg class="reel" viewBox="0 0 420 420" data-depth="24">
+    <g class="spin" style="transform-origin:210px 210px"><circle cx="210" cy="210" r="200" fill="none" stroke="rgba(242,167,195,.25)" stroke-width="1.5" stroke-dasharray="4 12"/></g>
+    <g class="reel2" style="transform-origin:210px 210px" fill="none" stroke="#D4246C" stroke-width="4" stroke-linecap="round">
+      <circle cx="210" cy="210" r="140" data-a="draw"/><circle cx="210" cy="210" r="40" data-a="draw"/>
+      <path d="M210 70v100M210 250v100M70 210h100M250 210h100" data-a="draw"/>
+    </g>
+  </svg>
+  <div class="a" data-split>Complementa o que já funciona.</div>
+  <div class="b" data-split>Não substitui.</div>
+  <div class="url" data-a="up">gusang.com.br/recomenda</div>
+  <div class="brand" data-a="up">Assopra<b>Fitas</b></div>
+</section>
+
+</div>
+
+<div id="iris"><div class="i1"></div><div class="i2"></div></div>
+<canvas id="static"></canvas>
+<div id="grain"></div>
+<div id="cursor"></div><div id="ring"></div>
+<div id="ui"><span class="play"><i></i>PLAY</span><span id="tc">0:00:00</span><span class="count"><b id="cur">01</b> / 22</span><span id="lbl">CAPA</span><div id="prog"><i></i></div><div id="dots"></div></div>
+
+<script>
+(()=>{
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const slides=$$('.slide'), stage=$('#stage'); let idx=0, busy=false;
+const BG={dark:'#1F1E1A',light:'#EDECE8',mag:'#D4246C'};
+
+function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080);stage.style.transform=`translate(-50%,-50%) scale(${s})`;}
+addEventListener('resize',fit);fit();
+
+/* icons */
+const I={clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+link:'<path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
+star:'<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5a5 5 0 0 1 5.5 5"/>',
+toolbox:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18M8 12v3M16 12v3"/>',
+code:'<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+book:'<path d="M3 5a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v15a2 2 0 0 0-2-2H3zM21 5a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v15a2 2 0 0 1 2-2h7z"/>',
+play:'<path d="M7 4l13 8-13 8z"/>',bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/>',
+wrench:'<path d="M15 4a5 5 0 0 0-4.5 7L4 17.5 6.5 20l6.5-6.5A5 5 0 0 0 20 9l-3 1-2-2 1-3z"/>',
+target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+megaphone:'<path d="M3 11v3h3l7 5V6L6 11zM17 9a4 4 0 0 1 0 7"/>',layout:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
+shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+check:'<path d="M5 12l5 5 9-10"/>',chat:'<path d="M4 20l1.5-4A8 8 0 1 1 9 19z"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+cog:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'};
+$$('[data-icon]').forEach(e=>e.innerHTML=`<svg viewBox="0 0 24 24">${I[e.dataset.icon]||''}</svg>`);
+$$('[data-arr]').forEach(e=>e.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>');
+
+/* split headlines into masked words */
+function split(el){
+  const out=[];const walk=(n,em)=>n.childNodes.forEach(c=>{
+    if(c.nodeType===3){c.textContent.split(/(\s+)/).forEach(t=>{if(!t)return;out.push(/^\s+$/.test(t)?{sp:1}:{t,em});});}
+    else if(c.nodeType===1&&c.hasAttribute('data-count')){out.push({node:c.outerHTML,em});}
+    else walk(c,em||c.tagName==='EM');});
+  walk(el,false);
+  el.innerHTML=out.map(o=>o.sp?' ':`<span class="ln"><span class="wd"${o.em?' style="color:var(--mag)"':''}>${o.node||o.t}</span></span>`).join('');
+}
+$$('[data-split]').forEach(split);
+
+const fmt=(v,d)=>v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+let tl=null;
+function prepDraw(s){$$('[data-a="draw"]',s).forEach(p=>{let L=600;try{L=p.getTotalLength()||600}catch(e){} p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.dataset.len=L;});}
+function enter(s){
+  if(tl)tl.kill();
+  tl=gsap.timeline({defaults:{ease:'expo.out'}});
+  $$('[data-split]',s).forEach((h,k)=>tl.fromTo($$('.wd',h),{yPercent:120,skewY:7,opacity:0},{yPercent:0,skewY:0,opacity:1,duration:1.15,stagger:.045},.12+k*.25));
+  let t=.45;
+  $$('[data-a]',s).forEach(el=>{const a=el.dataset.a;
+    if(a==='fade'){tl.fromTo(el,{opacity:0,y:10},{opacity:1,y:0,duration:.9},.05);}
+    else if(a==='up'){tl.fromTo(el,{y:46,opacity:0,filter:'blur(10px)'},{y:0,opacity:1,filter:'blur(0px)',duration:1.1},t);t+=.08;}
+    else if(a==='card'){tl.fromTo(el,{y:90,opacity:0,scale:.96,clipPath:'inset(18% 0 0 0 round 28px)'},{y:0,opacity:1,scale:1,clipPath:'inset(0% 0 0 0 round 28px)',duration:1.25},t);t+=.1;}
+    else if(a==='li'){tl.fromTo(el,{x:-30,opacity:0},{x:0,opacity:1,duration:.8},t+.25);t+=.05;}
+    else if(a==='banner'){tl.fromTo(el,{clipPath:'inset(0 100% 0 0 round 24px)'},{clipPath:'inset(0 0% 0 0 round 24px)',duration:1.2,ease:'expo.inOut'},t+.1);tl.fromTo(el.children,{opacity:0,x:-20},{opacity:1,x:0,duration:.8,stagger:.08},t+.6);}
+    else if(a==='grow'){tl.fromTo(el,{scaleX:0,transformOrigin:'left'},{scaleX:1,duration:1.4,ease:'expo.inOut'},t);}
+    else if(a==='pop'){tl.fromTo(el,{scale:0,opacity:0},{scale:1,opacity:1,duration:.9,ease:'back.out(2)'},t);t+=.08;}
+    else if(a==='scale'){tl.fromTo(el,{scale:.2,opacity:0,transformOrigin:'560px 460px'},{scale:1,opacity:1,duration:1.8,ease:'elastic.out(1,.7)'},.1);}
+    else if(a==='draw'){tl.fromTo(el,{strokeDashoffset:el.dataset.len},{strokeDashoffset:0,duration:1.8,ease:'power3.inOut'},.3);}
+  });
+  $$('[data-bar]',s).forEach((b,i)=>tl.fromTo(b,{scaleX:0},{scaleX:+b.dataset.bar,duration:1.4,ease:'expo.inOut'},.9+i*.12));
+  $$('[data-count]',s).forEach(el=>{const o={v:0},to=+el.dataset.count,d=+(el.dataset.dec||0);tl.to(o,{v:to,duration:1.8,ease:'power3.out',onUpdate:()=>el.textContent=fmt(o.v,d)},.7);});
+  $$('.wire b',s).forEach((b,i)=>gsap.fromTo(b,{left:'0%'},{left:'100%',duration:1.6,ease:'power2.inOut',repeat:-1,delay:1.2+i*.8,repeatDelay:.8}));
+}
+gsap.utils.toArray('.spin').forEach(g=>gsap.to(g,{rotate:360,duration:50,repeat:-1,ease:'none'}));
+gsap.utils.toArray('.spin2').forEach(g=>gsap.to(g,{rotate:-360,duration:30,repeat:-1,ease:'none'}));
+gsap.utils.toArray('.reel,.reel2').forEach(g=>gsap.to(g,{rotate:360,duration:6,repeat:-1,ease:'none'}));
+$$('.card').forEach(c=>{const s=document.createElement('i');s.className='shine';c.appendChild(s);
+  c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)/r.width*100+'%');c.style.setProperty('--my',(e.clientY-r.top)/r.height*100+'%');});});
+
+/* theme */
+function theme(s){const t=s.dataset.theme;document.body.classList.remove('light','mag');if(t!=='dark')document.body.classList.add(t);}
+
+/* static burst (VHS channel change) */
+const st=$('#static'),sx=st.getContext('2d');
+function staticBurst(){st.width=Math.ceil(innerWidth/3);st.height=Math.ceil(innerHeight/3);
+  let n=0;const draw=()=>{const im=sx.createImageData(st.width,st.height);const d=im.data;
+    for(let i=0;i<d.length;i+=4){const v=Math.random()*255;d[i]=v;d[i+1]=v*.85;d[i+2]=v*.9;d[i+3]=255;}
+    sx.putImageData(im,0,0);
+    const y=Math.random()*st.height;sx.fillStyle='rgba(212,36,108,.6)';sx.fillRect(0,y,st.width,6);
+    if(++n<7)requestAnimationFrame(draw);};
+  draw();gsap.fromTo(st,{opacity:.28},{opacity:0,duration:.45,ease:'power2.out'});}
+
+/* iris transition */
+const L1=$('#iris .i1'),L2=$('#iris .i2'); let lastX=null,lastY=null;
+function go(n,dir){
+  if(busy||n===idx||n<0||n>=slides.length)return; busy=true; dir=dir||(n>idx?1:-1);
+  const from=slides[idx],to=slides[n];
+  const ox=lastX!=null?lastX:(dir>0?innerWidth*.88:innerWidth*.12), oy=lastY!=null?lastY:innerHeight*.5; lastX=lastY=null;
+  const at=`${ox}px ${oy}px`;
+  L1.style.background=to.dataset.theme==='mag'?'#1F1E1A':'#D4246C'; L2.style.background=BG[to.dataset.theme];
+  gsap.set([L1,L2],{clipPath:`circle(0% at ${at})`,opacity:1});
+  from.classList.add('glitch');staticBurst();
+  const T=gsap.timeline({onComplete:()=>{busy=false;}});
+  T.to(L1,{clipPath:`circle(150% at ${at})`,duration:.75,ease:'expo.inOut'},.08);
+  T.to(L2,{clipPath:`circle(150% at ${at})`,duration:.7,ease:'expo.inOut'},.24);
+  T.add(()=>{from.classList.remove('on','glitch');idx=n;to.classList.add('on');theme(to);scene.set(to.dataset.scene);ui();prepDraw(to);enter(to);},.82);
+  T.to([L1,L2],{opacity:0,duration:.45,ease:'power2.out'},.88);
+}
+function ui(){$('#cur').textContent=String(idx+1).padStart(2,'0');$('#lbl').textContent=slides[idx].dataset.label.toUpperCase();
+  gsap.to('#prog i',{scaleX:(idx+1)/slides.length,duration:1,ease:'expo.inOut'});$$('#dots button').forEach((b,i)=>b.classList.toggle('on',i===idx));}
+slides.forEach((s,i)=>{const b=document.createElement('button');b.title=s.dataset.label;b.onclick=e=>{e.stopPropagation();lastX=e.clientX;lastY=e.clientY;go(i);};$('#dots').appendChild(b);});
+
+addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();go(idx+1,1);}
+  else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();go(idx-1,-1);}
+  else if(e.key==='Home')go(0,-1);else if(e.key==='End')go(slides.length-1,1);
+  else if(e.key.toLowerCase()==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}
+});
+let wl=0;addEventListener('wheel',e=>{const now=Date.now();if(now-wl<950||Math.abs(e.deltaY)+Math.abs(e.deltaX)<25)return;wl=now;go(idx+((e.deltaY||e.deltaX)>0?1:-1));},{passive:true});
+let tx=null;addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{if(tx==null)return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)go(idx+(d<0?1:-1));tx=null;});
+addEventListener('click',e=>{if(e.target.closest('#dots'))return;lastX=e.clientX;lastY=e.clientY;go(idx+(e.clientX>innerWidth*.25?1:-1));});
+
+/* timecode */
+const t0=Date.now();setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);$('#tc').textContent=`${Math.floor(s/3600)}:${String(Math.floor(s/60)%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;},1000);
+
+/* cursor + parallax */
+const M={x:innerWidth/2,y:innerHeight/2,nx:0,ny:0};
+const cx=gsap.quickTo('#cursor','x',{duration:.12}),cy=gsap.quickTo('#cursor','y',{duration:.12}),rx=gsap.quickTo('#ring','x',{duration:.45}),ry=gsap.quickTo('#ring','y',{duration:.45});
+addEventListener('mousemove',e=>{M.x=e.clientX;M.y=e.clientY;M.nx=e.clientX/innerWidth-.5;M.ny=e.clientY/innerHeight-.5;cx(M.x);cy(M.y);rx(M.x);ry(M.y);
+  $$('[data-depth]',slides[idx]).forEach(el=>gsap.to(el,{x:-M.nx*el.dataset.depth*2,y:-M.ny*el.dataset.depth*2,duration:1.2,ease:'power3.out'}));});
+document.addEventListener('mouseover',e=>{if(e.target.closest('.card,.chip,#dots button,.banner'))gsap.to('#ring',{scale:1.7,duration:.35});});
+document.addEventListener('mouseout',e=>{if(e.target.closest('.card,.chip,#dots button,.banner'))gsap.to('#ring',{scale:1,duration:.35});});
+
+/* canvas scenes */
+const cv=$('#bg'),ctx=cv.getContext('2d');let W,H;
+const scene={name:'bloom',t:0,P:[],set(n){this.name=n;this.init();},init(){
+  this.P=[];
+  if(this.name==='vhs')for(let i=0;i<90;i++)this.P.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.6+.3,v:Math.random()*.25+.05,a:Math.random()*.35+.08});
+  if(this.name==='bloom')for(let i=0;i<5;i++)this.P.push({x:Math.random()*W,y:Math.random()*H,r:(.12+Math.random()*.2)*Math.max(W,H),sx:(Math.random()-.5)*.25,sy:(Math.random()-.5)*.25});
+  if(this.name==='pixels')for(let i=0;i<4;i++)this.P.push({x:Math.random()*W,y:Math.random()*H,r:120+Math.random()*260,sx:(Math.random()-.5)*.18,sy:(Math.random()-.5)*.18});
+}};
+function rs(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);scene.init();}
+addEventListener('resize',rs);
+function frame(){
+  const t=(scene.t+=.005);
+  if(scene.name==='bloom'){
+    const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#D8266F');g.addColorStop(1,'#B91B5C');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    scene.P.forEach(p=>{p.x+=p.sx;p.y+=p.sy;if(p.x<-p.r)p.x=W+p.r;if(p.x>W+p.r)p.x=-p.r;if(p.y<-p.r)p.y=H+p.r;if(p.y>H+p.r)p.y=-p.r;
+      const gx=p.x+M.nx*40,gy=p.y+M.ny*40;const rg=ctx.createRadialGradient(gx,gy,0,gx,gy,p.r);rg.addColorStop(0,'rgba(255,255,255,.10)');rg.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=rg;ctx.beginPath();ctx.arc(gx,gy,p.r,0,7);ctx.fill();});
+    ctx.strokeStyle='rgba(31,30,26,.10)';ctx.lineWidth=1;
+    for(let k=0;k<6;k++){ctx.beginPath();for(let x=0;x<=W;x+=16){const y=H*.78+k*14+Math.sin(x*.004+t*2+k*.6)*30;x?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();}
+  } else if(scene.name==='vhs'){
+    ctx.fillStyle='#1F1E1A';ctx.fillRect(0,0,W,H);
+    const gx=W*.82+M.nx*120,gy=H*.85+M.ny*80;const rg=ctx.createRadialGradient(gx,gy,0,gx,gy,W*.5);rg.addColorStop(0,'rgba(212,36,108,.16)');rg.addColorStop(1,'rgba(212,36,108,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+    scene.P.forEach(p=>{p.y-=p.v;p.x+=Math.sin(t*3+p.y*.01)*.15;if(p.y<0){p.y=H;p.x=Math.random()*W;}ctx.fillStyle=`rgba(242,167,195,${p.a})`;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();});
+    const by=((t*90)%(H+300))-150;const bg=ctx.createLinearGradient(0,by-70,0,by+70);bg.addColorStop(0,'rgba(255,255,255,0)');bg.addColorStop(.5,'rgba(255,255,255,.035)');bg.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=bg;ctx.fillRect(0,by-70,W,140);
+    ctx.fillStyle='rgba(0,0,0,.16)';for(let y=0;y<H;y+=4)ctx.fillRect(0,y,W,1);
+    if(Math.random()<.012){const y=Math.random()*H;ctx.fillStyle='rgba(212,36,108,.25)';ctx.fillRect(0,y,W,2);}
+  } else if(scene.name==='pixels'){
+    ctx.fillStyle='#EDECE8';ctx.fillRect(0,0,W,H);
+    scene.P.forEach(p=>{p.x+=p.sx;p.y+=p.sy;if(p.x<-p.r)p.x=W+p.r;if(p.x>W+p.r)p.x=-p.r;if(p.y<-p.r)p.y=H+p.r;if(p.y>H+p.r)p.y=-p.r;
+      ctx.strokeStyle='rgba(212,36,108,.10)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.stroke();});
+    const s=Math.max(30,W/52);
+    for(let y=s/2;y<H;y+=s)for(let x=s/2;x<W;x+=s){
+      const d=Math.hypot(x-M.x,y-M.y),near=Math.max(0,1-d/170);
+      const w=Math.sin(x*.01+t*2)*Math.cos(y*.012-t*1.5);
+      if(near>0){ctx.fillStyle=`rgba(212,36,108,${.08+near*.22})`;const z=3+near*5;ctx.fillRect(x-z/2,y-z/2,z,z);}
+      else{ctx.fillStyle=`rgba(31,30,26,${.05+w*.025})`;ctx.fillRect(x-1.5,y-1.5,3,3);}
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+/* boot */
+const first=slides[0];first.classList.add('on');theme(first);rs();scene.set(first.dataset.scene);ui();
+gsap.set(L2,{background:'#1F1E1A',clipPath:'circle(150% at 50% 50%)',opacity:1});
+const boot=()=>{prepDraw(first);gsap.to(L2,{clipPath:'circle(0% at 50% 50%)',duration:1.2,ease:'expo.inOut',delay:.15});enter(first);requestAnimationFrame(frame);};
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(boot);
+})();
+</script>
+</body>
+</html>
